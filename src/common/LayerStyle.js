@@ -28,7 +28,7 @@ const styles = {
     }),
     'MultiPolygon': new Style({
         stroke: new Stroke({
-            color: 'yellow',
+            color: 'pink',
             width: 1,
         }),
         fill: new Fill({
@@ -37,7 +37,7 @@ const styles = {
     }),
     'Polygon': new Style({
         stroke: new Stroke({
-            color: 'blue',
+            color: 'yellow',
             lineDash: [4],
             width: 3,
         }),
@@ -47,7 +47,8 @@ const styles = {
     }),
     'GeometryCollection': new Style({
         stroke: new Stroke({
-            color: 'magenta',
+            // magenta
+            color: 'yellow',
             width: 2,
         }),
         fill: new Fill({
@@ -57,7 +58,7 @@ const styles = {
             radius: 10,
             fill: null,
             stroke: new Stroke({
-                color: 'magenta',
+                color: 'yellow',
             }),
         }),
     }),

@@ -1,10 +1,10 @@
 <template>
-  <div class="mainContainer">
-    <div class="mindmap">
-      <mind-map-container/>
+  <div class="mainContainer" >
+    <div class="mindmap" >
+      <mind-map-container @update-map="updateMap"/>
     </div>
-    <div class="openlayers">
-      <open-layers-container/>
+    <div class="openlayers" >
+      <open-layers-container :geojson="geojson"/>
     </div>
   </div>
 </template>
@@ -21,9 +21,21 @@ export default {
 
   name: 'HomeView',
 
+  data: function() {
+    return {
+      geojson: String
+    }
+  },
+
   components: {
     MindMapContainer,
     OpenLayersContainer
+  },
+
+  methods: {
+    updateMap(geojson) {
+      this.geojson = geojson;
+    }
   }
 }
 </script>

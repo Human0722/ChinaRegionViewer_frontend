@@ -3,76 +3,83 @@ import "ol/ol.css"
 import {Map,View} from "ol";
 import TileLayer from "ol/layer/Tile";
 import {OSM, XYZ} from "ol/source";
-import shp from 'shpjs'
+import {styleFunction} from '@/common/LayerStyle'
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import GeoJSON from "ol/format/GeoJSON"
-import {styleFunction} from '@/common/LayerStyle'
+import {GeoJSON} from "ol/format";
+import {easeOut} from "ol/easing"
 
 export default {
   name: 'OpenLayersContainer',
+  props: ['geojson'],
   data: function() {
     return {
-      map: Object
+      baseLayer: Object,
+      map: Object,
+      mapId: Object
     }
   },
   methods: {
-    handleFiles(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      const that = this;
-      reader.onload = (e) => {
-        const binaryString = e.target.result;
-        console.log("add:" + binaryString)
-        shp(binaryString).then(function(data){
-          var vectorSource = new VectorSource({
-            features: new GeoJSON().readFeatures(data)
-          });
-          var vectorLayer = new VectorLayer({
-            source: vectorSource,
-            style: styleFunction
-          });
-            that.map.addLayer(vectorLayer);
-        })
-      };
-      reader.readAsDataURL(file);
+
+  },
+  watch: {
+    geojson: function(newGeojson, oldGeojson) {
+      // clear all layers except baseLayer,and add new Geojson Layer
+      let that = this;
+      let layers = that.map.getLayers();
+      layers.forEach(function(layer) {
+        if (layer !== that.baseLayer) {
+          that.map.removeLayer(layer)
+        }
+      });
+      // render new layer
+      let vectorSource = new VectorSource({
+        features: new GeoJSON().readFeatures(newGeojson)
+      });
+      let vectorLayer = new VectorLayer({
+        source: vectorSource,
+        style: styleFunction
+      });
+      that.map.addLayer(vectorLayer);
+      //设置最佳视角
+      let extend = vectorSource.getExtent();
+      that.map.getView().fit(extend, {
+        padding: [200, 200,200,200],
+        duration: 2000,
+        easing: easeOut,
+      });
     }
   },
   mounted() {
 
-    // const geoJson = shp("./wuxi.zip").then(function(data) {
-    //   console.log(data)
-    // }).catch(e=>console.log('error', e))
-    //  const vectorSource =  new VectorSource({
-    //    features: new GeoJSON().readFeatures(geoJson)
-    //  });
-    //  const vectorLayer = new VectorLayer({
-    //    source: vectorSource,
-    //  });
+    // init map start
+     this.baseLayer = new TileLayer({
+       source: new XYZ({
+         url: 'https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+       })
+     });
      this.map = new Map({
       target: 'map',
       layers: [
-        new TileLayer({
-          source: new XYZ({
-            url: 'https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-          })
-        }),
+        this.baseLayer
       ],
       view: new View({
         projection: 'EPSG:4326',
         center: [120.30328, 31.57299],
+        // center: [13195349,3725641],
         zoom: 12
       }),
     });
-
-     console.log("mounted:" + this.map)
+    // init map end
+    // init url reader start
+    this.mapId = window.location.hash.substring(1);
+    // init url reader end
   }
 }
 </script>
 
 <template>
     <div id="map">
-      <input type="file" id="input" @change="handleFiles($event)">
     </div>
 </template>
 
