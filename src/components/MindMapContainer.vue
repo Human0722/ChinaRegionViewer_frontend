@@ -58,13 +58,41 @@ export default {
     this.markdownContent = testContent;
     this.update();
 
+    let newHash = this.$route.hash;
+    console.log("newHash:" + newHash)
+    //如果hash 为空，则渲染全国省数据,并展示全国地图
+    if (newHash === undefined || newHash ==="") {
+      axios.get("/shape/index_province").then(response => {
+        console.log(response)
+        let markdown = RootMarkdownBuilder(response);
+        this.markdownContent = markdown;
+        this.update();
+      })
+    }else if (newHash.indexOf("province") !== -1) {
+      //如果是省级别,就重新渲染所有市的信息
+      let that = this;
+      axios.get("/shape/index_city/" + newHash.substring(9))
+          .then(response => {
+            let markdown = MapMarkdownBuilder(response);
+            that.markdownContent = markdown;
+            console.log(that.markdownContent)
+            that.update();
+          });
+    }else  {
+      //否则正常查询
+      axios.get("/shape/" + newHash.substring(1))
+          .then(response => {
+            this.$emit('update-map', response);
+          });
+    }
+
     // 查询所有省份的信息
-    axios.get("/shape/index_province").then(response => {
-      console.log(response)
-      let markdown = RootMarkdownBuilder(response);
-      this.markdownContent = markdown;
-      this.update();
-    })
+    // axios.get("/shape/index_province").then(response => {
+    //   console.log(response)
+    //   let markdown = RootMarkdownBuilder(response);
+    //   this.markdownContent = markdown;
+    //   this.update();
+    // })
   }
 }
 </script>
