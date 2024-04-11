@@ -34,7 +34,8 @@ class BaseMapSelector extends Control {
             optionValue = this.value
             const newBaseLayer = new TileLayer({
                 source: new XYZ({
-                    url: optionValue
+                    url: optionValue,
+                    crossOrigin: 'Anonymous'
                 })
             });
             map.getLayers().insertAt(0, newBaseLayer)
