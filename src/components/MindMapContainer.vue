@@ -43,8 +43,10 @@ export default {
         that.markdownContent = markdown;
         that.update();
         that.$emit('update-map', r2);
+      } else if(newHash ==="" || newHash === undefined) {
+        window.location.href = '/'
       } else {
-        //否则正常查询
+        // 否则正常查询
         axios.get("/shape/" + newHash.substring(1))
             .then(response => {
               this.$emit('update-map', response);
