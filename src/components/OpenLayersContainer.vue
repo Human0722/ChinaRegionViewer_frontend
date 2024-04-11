@@ -92,6 +92,9 @@ export default {
     },
     updateBaseLayer: function(layer) {
       this.baseLayer = layer
+    },
+    getGeoJson() {
+      return this.geojson;
     }
   },
   watch: {
@@ -149,7 +152,7 @@ export default {
         zoom: 12
       }),
     });
-    this.map.addControl(new ControlButton(this.map));
+    this.map.addControl(new ControlButton(this.map, this.getGeoJson));
     this.map.addControl(new BaseMapSelector(this.map, this.updateBaseLayer));
     // init map end
     // init url reader start

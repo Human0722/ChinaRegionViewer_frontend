@@ -1,10 +1,12 @@
 import {Control} from "ol/control";
 
 class ControlButton extends Control {
-    constructor (map) {
+    constructor (map, getGeoJson) {
 
         const shp_button = document.createElement('button')
         shp_button.innerText = 'Shapefile下载'
+        shp_button.disabled = true
+        shp_button.style.backgroundColor = 'gray'
         shp_button.addEventListener('click', ()=> {
             let hash = window.location.hash
         })
@@ -12,7 +14,12 @@ class ControlButton extends Control {
         const gson_button = document.createElement('button')
         gson_button.innerText = 'GeoJSON下载'
         gson_button.addEventListener('click', ()=> {
-            let hash = window.location.hash
+            let geojson = JSON.stringify(getGeoJson())
+            const blob = new Blob([geojson], { type: 'text/plain' }); // 将字符串封装成 Blob 对象
+            const link = document.createElement('a');
+            link.download = 'map.geojson'; // 设置下载的文件名
+            link.href = URL.createObjectURL(blob); // 将 Blob 对象转换为临时链接
+            link.click(); // 触发点击事件，开始下载文件
         })
 
         const png_button = document.createElement('button');
