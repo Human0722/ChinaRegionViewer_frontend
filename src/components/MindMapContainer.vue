@@ -32,19 +32,19 @@ export default {
     }
   },
   watch: {
-    '$route.hash': function(newHash, oldHash) {
+    '$route.hash': async function (newHash, oldHash) {
       if (newHash.indexOf("province") !== -1) {
-       //如果是省级别,就重新渲染所有市的信息
+        //如果是省级别,就重新渲染所有市的信息,并展示省地图
         let that = this;
-        axios.get("/shape/index_city/" + newHash.substring(9))
-            .then(response => {
-              let markdown = MapMarkdownBuilder(response);
-              that.markdownContent = markdown;
-              console.log(that.markdownContent)
-              that.update();
-            });
-      }else {
-       //否则正常查询
+
+        const r2 = await axios.get("/shape_reader/province_boundary/" + newHash.substring(9));
+        const r1 = await axios.get("/shape/index_city/" + newHash.substring(9));
+        let markdown = MapMarkdownBuilder(r1);
+        that.markdownContent = markdown;
+        that.update();
+        that.$emit('update-map', r2);
+      } else {
+        //否则正常查询
         axios.get("/shape/" + newHash.substring(1))
             .then(response => {
               this.$emit('update-map', response);
@@ -53,37 +53,36 @@ export default {
 
     }
   },
-  mounted() {
-    this.markMapView = Markmap.create(this.$refs.refSvg,{initialExpandLevel: 2});
+  async mounted() {
+    this.markMapView = Markmap.create(this.$refs.refSvg, {initialExpandLevel: 2});
     this.markdownContent = testContent;
     this.update();
 
     let newHash = this.$route.hash;
     console.log("newHash:" + newHash)
     //如果hash 为空，则渲染全国省数据,并展示全国地图
-    if (newHash === undefined || newHash ==="") {
+    if (newHash === undefined || newHash === "") {
       axios.get("/shape/index_province").then(response => {
         console.log(response)
         let markdown = RootMarkdownBuilder(response);
         this.markdownContent = markdown;
         this.update();
-      })
-    }else if (newHash.indexOf("province") !== -1) {
+      });
+      axios.get("/shape_reader/nation_boundary").then(response => {
+        this.$emit('update-map', response);
+      });
+    } else if (newHash.indexOf("province") !== -1) {
       //如果是省级别,就重新渲染所有市的信息
       let that = this;
-      axios.get("/shape/index_city/" + newHash.substring(9))
-          .then(response => {
-            let markdown = MapMarkdownBuilder(response);
-            that.markdownContent = markdown;
-            console.log(that.markdownContent)
-            that.update();
-          });
-    }else  {
-      //否则正常查询
-      axios.get("/shape/" + newHash.substring(1))
-          .then(response => {
-            this.$emit('update-map', response);
-          });
+      const r2 = await axios.get("/shape_reader/province_boundary/" + newHash.substring(9));
+      const r1 = await axios.get("/shape/index_city/" + newHash.substring(9));
+      let markdown = MapMarkdownBuilder(r1);
+      that.markdownContent = markdown;
+      that.update();
+      that.$emit('update-map', r2);
+    } else {
+      //否则重定向到国家级
+      window.location.href = '/';
     }
 
     // 查询所有省份的信息
