@@ -61,11 +61,9 @@ export default {
     this.update();
 
     let newHash = this.$route.hash;
-    console.log("newHash:" + newHash)
     //如果hash 为空，则渲染全国省数据,并展示全国地图
     if (newHash === undefined || newHash === "") {
       axios.get("/shape/index_province").then(response => {
-        console.log(response)
         let markdown = RootMarkdownBuilder(response);
         this.markdownContent = markdown;
         this.update();

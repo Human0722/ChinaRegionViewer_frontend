@@ -8,7 +8,9 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import {GeoJSON} from "ol/format";
 import {easeOut} from "ol/easing"
-import {Control, Zoom} from "ol/control";
+import {Control} from "ol/control";
+import ControlButton from "@/common/controls/ControlButton";
+import BaseMapSelector from "@/common/controls/BaseMapSelector";
 
 export default {
   name: 'OpenLayersContainer',
@@ -31,9 +33,16 @@ export default {
         element: element,
         target: 'map'
       });
+    },
+    updateBaseLayer: function(layer) {
+      this.baseLayer = layer
     }
   },
   watch: {
+    baseLayer: function(newValue, oldVal) {
+      console.log("come from watch: ")
+      console.log(newValue)
+    },
     geojson: function(newGeojson, oldGeojson) {
       // clear all layers except baseLayer,and add new Geojson Layer
       let that = this;
@@ -49,6 +58,7 @@ export default {
       });
       let vectorLayer = new VectorLayer({
         source: vectorSource,
+        projection: 'EPSG:4326',
         style: styleFunction
       });
       that.map.addLayer(vectorLayer);
@@ -82,7 +92,8 @@ export default {
         zoom: 12
       }),
     });
-    this.map.addControl(this.renderControl([{label: 'hi'}]));
+    this.map.addControl(new ControlButton({}));
+    this.map.addControl(new BaseMapSelector(this.map, this.updateBaseLayer));
     // init map end
     // init url reader start
     this.mapId = window.location.hash.substring(1);
